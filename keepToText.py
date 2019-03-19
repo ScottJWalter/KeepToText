@@ -70,9 +70,13 @@ def try_mkdir(dir):
 htmlExt = re.compile(r"\.html$", re.I)
     
 class Note:
-    def __init__(self, heading, text, labels):
+    def __init__(self, heading, title, text, labels):
 
         self.ctime = parse(heading, parserinfo(dayfirst=True))
+        if title == "":
+            self.title = "Untitled " + self.ctime.isoformat()
+        else:
+            self.title = title
         self.text = text
         self.labels = labels
 
@@ -87,8 +91,8 @@ class Note:
         
 def extractNoteFromHtmlFile(inputPath):
     """
-    Extracts the note heading (containing the ctime), text, and labels from
-    an exported Keep HTML file
+    Extracts the note heading (containing the ctime), title, text, and labels
+    from an exported Keep HTML file
     """
 
     with codecs.open(inputPath, 'r', 'utf-8') as myfile:
@@ -97,10 +101,11 @@ def extractNoteFromHtmlFile(inputPath):
     tree = etree.HTML(data)
 
     heading = tree.xpath("//div[@class='heading']/text()")[0].strip()
+    title = "\n".join(tree.xpath("//div[@class='title']/text()"))
     text = "\n".join(tree.xpath("//div[@class='content']/text()"))
     labels = tree.xpath("//div[@class='labels']/span[@class='label']/text()")
 
-    return Note(heading, text, labels)
+    return Note(heading, title, text, labels)
         
 def processHtmlFiles(inputDir):
     "Iterates over Keep HTML files to extract relevant notes data"
@@ -151,6 +156,37 @@ def htmlDirToXml(zipFileDir, htmlDir):
     with codecs.open(xmlFile, 'w', 'utf-8') as outfile:
         outfile.write(cintaXml.render(notes=notes))
 
+def htmlDirToSn(zipFileDir, htmlDir):
+    snFile = os.path.join(zipFileDir, "standardnotes-from-keep.txt")
+    notes = processHtmlFiles(inputDir=htmlDir)
+
+    snJSON = Template("""{
+  <%!
+    import hashlib, json, uuid
+  %>
+  "items": [
+    %for note in notes:
+    {
+      "created_at": "${note.ctime.isoformat()}",
+      "updated_at": "${note.ctime.isoformat()}",
+      "uuid": "${str(uuid.UUID(hashlib.sha256((note.ctime.isoformat()+note.title+note.text).encode('utf-8')).hexdigest()[:32]))}",
+      "content_type": "Note",
+      "content": {
+        "title": ${json.dumps(note.title)},
+        "text": ${json.dumps(note.text)},
+        "references": []
+      }
+    }${'' if loop.last else ','}
+    %endfor
+  ]
+}
+""")
+
+    msg("Generating Standard Notes TXT file: " + snFile)
+
+    with codecs.open(snFile, 'w', 'utf-8') as outfile:
+        outfile.write(snJSON.render(notes=notes))
+
 def keepZipToOutput(zipFileName):
     zipFileDir = os.path.dirname(zipFileName)
     takeoutDir = os.path.join(zipFileDir, "Takeout")
@@ -179,6 +215,9 @@ def keepZipToOutput(zipFileName):
     elif args.format == "CintaNotes":
         htmlDirToXml(zipFileDir=zipFileDir, htmlDir=htmlDir)
         
+    elif args.format == "StandardNotes":
+        htmlDirToSn(zipFileDir=zipFileDir, htmlDir=htmlDir)
+
 def setOutputEncoding():
     global outputEncoding
     outputEncoding = args.encoding
@@ -194,7 +233,7 @@ def getArgs():
         help="character encoding of output")
     parser.add_argument("--system-encoding", action="store_true",
         help="use the system encoding for the output")
-    parser.add_argument("--format", choices=["Evernote", "CintaNotes"],
+    parser.add_argument("--format", choices=["Evernote", "CintaNotes", "StandardNotes"],
         default='Evernote', help="Output Format")
     global args
     args = parser.parse_args()    
@@ -246,6 +285,14 @@ def doImports():
         global parse, parserinfo
         from dateutil.parser import parse, parserinfo
 
+    elif args.format == "StandardNotes":
+        global etree
+        from lxml import etree
+        global Template
+        from mako.template import Template
+        global parse, parserinfo
+        from dateutil.parser import parse, parserinfo
+
 def main():
     getArgs()
     doImports()
@@ -255,6 +302,8 @@ def main():
     
     try:
         keepZipToOutput(args.zipFile)
+    except Exception as ex:
+        sys.exit(ex)
     except WindowsError as ex:
         sys.exit(ex)
     except InvalidEncoding as ex:
