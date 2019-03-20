@@ -169,7 +169,7 @@ def htmlDirToSn(zipFileDir, htmlDir):
     {
       "created_at": "${note.ctime.isoformat()}",
       "updated_at": "${note.ctime.isoformat()}",
-      "uuid": "${str(uuid.UUID(hashlib.sha256((note.ctime.isoformat()+note.title+note.text).encode('utf-8')).hexdigest()[:32]))}",
+      "uuid": "${str(uuid.UUID(hashlib.sha256((note.ctime.isoformat()+note.title+note.text).encode('utf-8')).hexdigest()[:32], version=5))}",
       "content_type": "Note",
       "content": {
         "title": ${json.dumps(note.title)},
