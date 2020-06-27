@@ -16,6 +16,7 @@ outputEncoding = None
 MyHTMLParser = None
 args = None
 
+
 class InvalidEncoding(Exception):
     def __init__(self, inner):
         Exception.__init__(self)
@@ -265,11 +266,6 @@ def getArgs():
 
 def doImports():
     if args.format == "Evernote":
-        global HTMLParser
-        try:
-            from HTMLParser import HTMLParser
-        except ImportError:
-            from html.parser import HTMLParser
         
         global MyHTMLParser
         class MyHTMLParser(HTMLParser):
@@ -301,12 +297,6 @@ def doImports():
                 self.attrib = attrib
                 self.attribVal = attribVal
                 self.nesting = 0
-                
-    elif args.format == "CintaNotes":
-
-    elif args.format == "StandardNotes":
-        global Template
-        from mako.template import Template
 #>>>>>>> fork1/master
 
 def main():

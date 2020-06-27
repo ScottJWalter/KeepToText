@@ -1,8 +1,8 @@
 image:
   file: .gitpod.Dockerfile
 
-#tasks:
-#  - init: 'echo "TODO: Replace with init/build command"'
+tasks:
+  - init: pip install lxml
 #    command: 'echo "TODO: Replace with command to start project"'
 
 vscode:
