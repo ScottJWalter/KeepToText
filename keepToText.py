@@ -9,6 +9,7 @@ from dateutil.parser import parse, parserinfo
 from html.parser import HTMLParser
 from zipfile import ZipFile
 from lxml import etree
+from mako.template import Template
 
 
 outputEncoding = None
@@ -302,8 +303,6 @@ def doImports():
                 self.nesting = 0
                 
     elif args.format == "CintaNotes":
-        global Template
-        from mako.template import Template
 
     elif args.format == "StandardNotes":
         global Template

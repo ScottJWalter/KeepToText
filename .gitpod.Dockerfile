@@ -7,7 +7,9 @@ FROM gitpod/workspace-mongodb
 # More information: https://www.gitpod.io/docs/config-docker/
 
 RUN sudo apt-get update \
- && sudo apt-get full-upgrade -y \
  && sudo apt-get install -y \
+    libxml2-dev \
+    libxslt-dev \
+    python-dev \
     python3-lxml \
  && sudo rm -rf /var/lib/apt/lists/*
