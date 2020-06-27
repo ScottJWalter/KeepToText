@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/dan-and/KeepToText)
+
 # KeepToText
 
 Convert a Google Takeout zip file containing Google Keep notes to a
