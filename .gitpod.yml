@@ -2,8 +2,9 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - init: pip install lxml
-#    command: 'echo "TODO: Replace with command to start project"'
+  - init: |
+      pip install lxml
+      pip install Mako
 
 vscode:
   extensions:
