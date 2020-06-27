@@ -1,5 +1,5 @@
 import sys, glob, os, shutil, zipfile, time
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from zipfile import ZipFile
 
 class MyHTMLParser(HTMLParser):
@@ -117,7 +117,7 @@ def main():
     
     try:
         keepZipToText(zipFile)
-    except WindowsError as e:
+    except OSError as e:
         sys.exit(e)
 
 if __name__ == "__main__":
